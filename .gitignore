@@ -1,0 +1,14 @@
+# Personal data never goes in this repo: exports, transcripts, screenshots.
+*.csv
+*.xlsx
+*.xls
+*.zip
+*.xml
+data/
+transcripts/
+*.png
+*.jpg
+*.jpeg
+*.heic
+node_modules/
+.DS_Store

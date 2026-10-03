@@ -1,0 +1,1272 @@
+<title>Training Check-in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: sticky bar (title, window, tabs) over a single column; Overview is two
+   person columns side by side for screen-sharing, detail tabs stack cards. */
+:root {
+  --bg: #f2f4f6;
+  --surface: #ffffff;
+  --surface-2: #eaedf1;
+  --ink: #101720;
+  --ink-2: #48525e;
+  --muted: #7f8995;
+  --line: #dde2e8;
+  --axis: #c3c9d1;
+  --p1: #2a78d6;
+  --p2: #eb6834;
+  --p1-wash: rgba(42,120,214,.10);
+  --p2-wash: rgba(235,104,52,.10);
+  --good: #0ca30c;
+  --good-ink: #0b6b14;
+  --warn: #c98500;
+  --bad: #d03b3b;
+  --btn: #101720;
+  --btn-ink: #ffffff;
+  --focus: #2a78d6;
+  --font-display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r: 10px;
+  --fs: 15px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1014; --surface: #161a20; --surface-2: #1e242c; --ink: #f1f4f7; --ink-2: #b6bfca;
+    --muted: #7e8894; --line: #2a3139; --axis: #3a424c; --p1: #3987e5; --p2: #d95926;
+    --p1-wash: rgba(57,135,229,.16); --p2-wash: rgba(217,89,38,.16);
+    --good: #0ca30c; --good-ink: #39c45a; --warn: #fab219; --bad: #e66767; --btn: #f1f4f7; --btn-ink: #0d1014; --focus: #6aa8f0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1014; --surface: #161a20; --surface-2: #1e242c; --ink: #f1f4f7; --ink-2: #b6bfca;
+  --muted: #7e8894; --line: #2a3139; --axis: #3a424c; --p1: #3987e5; --p2: #d95926;
+  --p1-wash: rgba(57,135,229,.16); --p2-wash: rgba(217,89,38,.16);
+  --good: #0ca30c; --good-ink: #39c45a; --warn: #fab219; --bad: #e66767; --btn: #f1f4f7; --btn-ink: #0d1014; --focus: #6aa8f0;
+  color-scheme: dark;
+}
+:root.big { --fs: 18px; }
+html { font-size: var(--fs); }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 1rem; line-height: 1.45; }
+* { box-sizing: border-box; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: .01em; text-wrap: balance; margin: 0; }
+
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.bar-in { max-width: 1240px; margin: 0 auto; padding: 12px 20px 0; display: grid; gap: 10px; }
+.bar-top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.brand { font-family: var(--font-display); font-weight: 700; font-size: 1.45rem; letter-spacing: .02em; text-transform: uppercase; display: flex; align-items: baseline; gap: 10px; }
+.brand small { font-family: var(--font-body); font-weight: 500; font-size: .8rem; letter-spacing: 0; text-transform: none; color: var(--muted); }
+.bar-ctl { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+select, input[type=text], input[type=number], input[type=date], input[type=time], textarea {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; min-width: 0; }
+textarea { width: 100%; min-height: 140px; resize: vertical; line-height: 1.4; }
+.tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+.tab { border: 0; background: none; padding: 9px 14px 11px; color: var(--ink-2); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; display: flex; align-items: center; gap: 7px; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+.tab:hover { color: var(--ink); }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
+
+main { max-width: 1240px; margin: 0 auto; padding-block: 20px 60px; padding-inline: 20px; display: grid; gap: 20px; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 12px; font-weight: 600; cursor: pointer; }
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--btn); color: var(--btn-ink); border-color: var(--btn); }
+.btn.primary:hover { opacity: .9; }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn.small { padding: 4px 9px; font-size: .85rem; }
+.muted { color: var(--muted); }
+.ink2 { color: var(--ink-2); }
+.notice { border: 1px dashed var(--axis); border-radius: var(--r); padding: 14px 16px; color: var(--ink-2); background: var(--surface); }
+.notice b { color: var(--ink); }
+
+.window-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.window-line h2 { font-size: 1.6rem; }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr)); gap: 20px; }
+.pcol { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.phead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.phead h2 { font-size: 1.7rem; }
+.phead .dot { width: 12px; height: 12px; }
+.fresh { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: .78rem; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tiles.four { grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px 10px; display: grid; gap: 2px; min-width: 0; align-content: start; }
+.tile .lab { font-size: .78rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+.tile .val { font-family: var(--font-display); font-weight: 600; font-size: 2.3rem; line-height: 1.05; }
+.tile .val small { font-size: 1rem; font-weight: 500; color: var(--ink-2); margin-left: 4px; }
+.tile .sub { font-size: .84rem; color: var(--ink-2); min-height: 1.2em; }
+.tile.empty .val { color: var(--muted); font-size: 1.2rem; font-family: var(--font-body); font-weight: 500; padding-block: 10px 4px; }
+.spark { height: 30px; margin-top: 4px; }
+.pill { font-size: .72rem; font-weight: 700; letter-spacing: .03em; text-transform: none; padding: 1px 7px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; }
+.pill.good { color: var(--good-ink); background: color-mix(in srgb, var(--good) 14%, transparent); }
+.pill.warn { color: var(--ink); background: color-mix(in srgb, var(--warn) 22%, transparent); }
+.pill.bad { color: var(--bad); background: color-mix(in srgb, var(--bad) 13%, transparent); }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 12px; min-width: 0; align-content: start; }
+.card > header { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.card h3 { font-size: 1.25rem; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap: 16px; }
+
+.commit { display: grid; gap: 0; }
+.crow { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: start; padding: 9px 0; border-top: 1px solid var(--line); }
+.crow:first-child { border-top: 0; }
+.crow .t { font-weight: 600; }
+.crow .d { font-size: .84rem; color: var(--ink-2); }
+.st { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: .85rem; font-weight: 700; border: 0; cursor: pointer; padding: 0; }
+.st.met { background: color-mix(in srgb, var(--good) 18%, transparent); color: var(--good-ink); }
+.st.partial { background: color-mix(in srgb, var(--warn) 24%, transparent); color: var(--ink); }
+.st.missed { background: color-mix(in srgb, var(--bad) 15%, transparent); color: var(--bad); }
+.st.nodata, .st.manual, .st.skip { background: var(--surface-2); color: var(--muted); }
+.st:disabled { cursor: default; }
+.crow .tag { font-size: .72rem; color: var(--muted); white-space: nowrap; padding-top: 3px; }
+
+.chart { position: relative; width: 100%; min-height: 60px; }
+.chart svg { display: block; width: 100%; overflow: visible; }
+.chart text { font-family: var(--font-body); font-size: 11px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+.chart .tgt-label { fill: var(--ink-2); font-weight: 600; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .82rem; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+.legend i.box { width: 10px; height: 10px; border-radius: 2px; }
+#tip { position: fixed; z-index: 50; pointer-events: none; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 6px 20px rgba(0,0,0,.14); border-radius: 8px; padding: 7px 10px; font-size: .82rem; max-width: 260px; }
+#tip b { font-size: .95rem; display: block; }
+
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th { text-align: left; font-weight: 600; color: var(--muted); font-size: .75rem; letter-spacing: .05em; text-transform: uppercase; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.mini { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+.mini .chip { font-size: .72rem; }
+.chip.good { background: color-mix(in srgb, var(--good) 15%, transparent); color: var(--good-ink); }
+
+.goals { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.form { display: grid; gap: 10px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.row > label { display: grid; gap: 3px; font-size: .8rem; color: var(--ink-2); font-weight: 600; }
+.drop { border: 2px dashed var(--axis); border-radius: var(--r); padding: 18px; text-align: center; color: var(--ink-2); cursor: pointer; }
+.drop.over { border-color: var(--focus); background: var(--p1-wash); }
+.status { font-size: .88rem; color: var(--ink-2); min-height: 1.3em; }
+.status.err { color: var(--bad); }
+.status.ok { color: var(--good-ink); }
+
+.ask-box { display: flex; gap: 8px; }
+.ask-box input { flex: 1; font-size: 1.05rem; padding: 10px 12px; }
+.suggest { display: flex; gap: 6px; flex-wrap: wrap; }
+.suggest button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 11px; font-size: .85rem; cursor: pointer; color: var(--ink-2); }
+.suggest button:hover { color: var(--ink); border-color: var(--axis); }
+.answer { display: grid; gap: 10px; }
+.answer .q { font-family: var(--font-display); font-weight: 600; font-size: 1.2rem; }
+.answer .a { white-space: pre-wrap; font-size: 1.02rem; }
+.answer .a.thinking { color: var(--muted); }
+.answer .meta { font-size: .78rem; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+@media (max-width: 560px) {
+  .bar-in, main { padding-inline: 16px; }
+  .tile .val { font-size: 1.9rem; }
+  .bar-ctl { margin-left: 0; }
+  .brand { font-size: 1.15rem; }
+  .brand small { display: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tile, .card { transition: border-color .15s; }
+}
+</style>
+
+<div class="bar">
+  <div class="bar-in">
+    <div class="bar-top">
+      <div class="brand">Training Check-in <small id="sync-note">Loading…</small></div>
+      <div class="bar-ctl">
+        <label for="win" class="muted" style="font-size:.85rem">Window</label>
+        <select id="win" aria-label="Time window"></select>
+        <button class="btn small" id="bigger" type="button" aria-pressed="false" title="Larger text for screen sharing">Larger text</button>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Sections"></nav>
+  </div>
+</div>
+<main id="main" aria-live="polite"></main>
+<div id="tip" hidden></div>
+
+<script src="core.js"></script>
+<script>
+"use strict";
+const C = window.Core;
+
+// ------------------------------------------------------------------ state
+const S = {
+  db: null, sample: null, canWrite: null, ready: false,
+  tab: "overview", winKey: "since",
+  people: {}, days: {}, workouts: {}, marks: {}, coverage: {}, checkins: [],
+  tabNodes: {}, asks: [], asker: null,
+};
+try { S.tab = localStorage.getItem("tab") || "overview"; S.asker = localStorage.getItem("asker"); if (localStorage.getItem("big") === "1") document.documentElement.classList.add("big"); } catch (_) {}
+
+// ---------------------------------------------------------------- helpers
+function h(tag, props, ...kids) {
+  const el = document.createElement(tag);
+  if (props) for (const [k, v] of Object.entries(props)) {
+    if (v == null || v === false) continue;
+    if (k === "class") el.className = v;
+    else if (k === "style") el.style.cssText = v;
+    else if (k === "text") el.textContent = v;
+    else if (k.startsWith("on") && typeof v === "function") el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v === true ? "" : v);
+  }
+  for (const c of kids.flat(Infinity)) if (c != null && c !== false) el.append(c instanceof Node ? c : String(c));
+  return el;
+}
+const NS = "http://www.w3.org/2000/svg";
+function s(tag, attrs, ...kids) {
+  const el = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs || {})) if (v != null) el.setAttribute(k, v);
+  for (const c of kids) if (c != null) el.append(c instanceof Node ? c : document.createTextNode(String(c)));
+  return el;
+}
+const fmtInt = (n) => (n == null || isNaN(n) ? "—" : Math.round(n).toLocaleString("en-US"));
+const fmt1 = (n) => (n == null || isNaN(n) ? "—" : (Math.round(n * 10) / 10).toFixed(1));
+const fmtK = (n) => (n == null ? "—" : n >= 10000 ? (n / 1000).toFixed(n % 1000 === 0 ? 0 : 1) + "k" : fmtInt(n));
+const fmtSigned = (n, d = 1) => (n == null || isNaN(n) ? "—" : (n > 0 ? "+" : n < 0 ? "−" : "±") + Math.abs(n).toFixed(d));
+const fmtDur = (sec) => { sec = Math.round(sec); const m = Math.floor(sec / 60), r = sec % 60; return `${m}:${String(r).padStart(2, "0")}`; };
+const today = () => C.todayLocal();
+const store = (k, v) => { try { localStorage.setItem(k, v); } catch (_) {} };
+
+function personIds() {
+  const ids = new Set(Object.keys(S.people));
+  for (const src of [S.days, S.workouts, S.marks]) for (const k of Object.keys(src)) ids.add(k);
+  return [...ids].sort((a, b) => ((S.people[a] || {}).order ?? 99) - ((S.people[b] || {}).order ?? 99) || a.localeCompare(b));
+}
+function personColor(id) {
+  const slot = (S.people[id] || {}).color || (personIds().indexOf(id) % 2) + 1;
+  return slot === 2 ? "var(--p2)" : "var(--p1)";
+}
+function personName(id) { return (S.people[id] || {}).name || id; }
+function model(id) {
+  const p = S.people[id] || {};
+  return { id, ...p, targets: p.targets || {}, days: S.days[id] || {}, workouts: S.workouts[id] || [], coverage: S.coverage[id] || {}, marks: S.marks[id] || [] };
+}
+
+// --------------------------------------------------------------- windows
+function windowOptions() {
+  const t = today(), tomorrow = C.addDays(t, 1);
+  const cis = S.checkins.filter((c) => c.date <= t);
+  const out = [];
+  if (cis.length) {
+    const last = cis[cis.length - 1];
+    out.push({ key: "since", label: `Since last check-in (${C.fmtDate(last.date)})`, from: last.date, to: tomorrow, checkin: last });
+  }
+  out.push({ key: "7", label: "Last 7 days", from: C.addDays(t, -6), to: tomorrow });
+  out.push({ key: "28", label: "Last 4 weeks", from: C.addDays(t, -27), to: tomorrow });
+  for (let i = cis.length - 2; i >= 0; i--) {
+    out.push({ key: "ci:" + cis[i].date, label: `${C.fmtDate(cis[i].date)} → ${C.fmtDate(cis[i + 1].date)} check-in week`, from: cis[i].date, to: cis[i + 1].date, checkin: cis[i] });
+  }
+  return out;
+}
+function currentWindow() {
+  const opts = windowOptions();
+  return opts.find((o) => o.key === S.winKey) || opts[0];
+}
+function renderWindowSelect() {
+  const sel = document.getElementById("win");
+  const opts = windowOptions();
+  const cur = currentWindow();
+  sel.replaceChildren(...opts.map((o) => h("option", { value: o.key, selected: o.key === cur.key }, o.label)));
+}
+document.getElementById("win").addEventListener("change", (e) => { S.winKey = e.target.value; render(); });
+document.getElementById("bigger").addEventListener("click", (e) => {
+  const on = document.documentElement.classList.toggle("big");
+  e.currentTarget.setAttribute("aria-pressed", on);
+  store("big", on ? "1" : "0");
+  requestAnimationFrame(drawCharts);
+});
+
+// ------------------------------------------------------------------- tabs
+function tabList() {
+  return [
+    { id: "overview", label: "Overview" },
+    ...personIds().map((id) => ({ id: "p:" + id, label: personName(id), color: personColor(id) })),
+    { id: "ask", label: "Ask" },
+    { id: "checkins", label: "Check-ins" },
+    { id: "data", label: "Add data" },
+  ];
+}
+function renderTabs() {
+  const nav = document.getElementById("tabs");
+  const tabs = tabList();
+  if (!tabs.some((t) => t.id === S.tab)) S.tab = "overview";
+  nav.replaceChildren(...tabs.map((t) => h("button", {
+    class: "tab", role: "tab", type: "button", "aria-selected": t.id === S.tab ? "true" : "false",
+    onclick: () => { S.tab = t.id; store("tab", t.id); render(); window.scrollTo({ top: 0 }); },
+  }, t.color ? h("span", { class: "dot", style: `background:${t.color}` }) : null, t.label)));
+}
+
+// ----------------------------------------------------------------- charts
+const charts = new Map();
+const tip = document.getElementById("tip");
+function showTip(evt, nodes) {
+  tip.replaceChildren(...nodes);
+  tip.hidden = false;
+  const r = tip.getBoundingClientRect();
+  let x = evt.clientX + 14, y = evt.clientY + 14;
+  if (x + r.width > innerWidth - 8) x = evt.clientX - r.width - 14;
+  if (y + r.height > innerHeight - 8) y = evt.clientY - r.height - 14;
+  tip.style.left = Math.max(8, x) + "px"; tip.style.top = Math.max(8, y) + "px";
+}
+const hideTip = () => { tip.hidden = true; };
+
+function chartBox(spec) {
+  const el = h("div", { class: "chart", role: "img", "aria-label": spec.aria || spec.title || "Chart" });
+  charts.set(el, spec);
+  return el;
+}
+function drawCharts() {
+  for (const [el, spec] of charts) {
+    if (!el.isConnected) { charts.delete(el); continue; }
+    el.replaceChildren();
+    const w = Math.max(240, el.clientWidth || 600);
+    if (spec.type === "bar") drawBar(el, spec, w);
+    else if (spec.type === "line") drawLine(el, spec, w);
+    else if (spec.type === "spark") drawSpark(el, spec, w);
+  }
+}
+let resizeT;
+addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(drawCharts, 120); });
+
+function niceMax(v) {
+  if (!(v > 0)) return 1;
+  const p = Math.pow(10, Math.floor(Math.log10(v)));
+  for (const m of [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) if (m * p >= v) return m * p;
+  return 10 * p;
+}
+/** Bars: spec {data:[{label, value, tip?, dim?}], target?, targetLabel?, color, fmt, height} */
+function drawBar(el, spec, W) {
+  const H = spec.height || 170, ml = 40, mr = spec.target ? 54 : 8, mt = 10, mb = 22;
+  const pw = W - ml - mr, ph = H - mt - mb;
+  const vals = spec.data.map((d) => d.value).filter((v) => v != null);
+  const top = Math.max(...vals, spec.target || 0, spec.minMax || 0);
+  const yMax = spec.integer ? Math.max(2, Math.ceil((top * 1.1) / 2) * 2) : niceMax(top * 1.05);
+  const y = (v) => mt + ph - (v / yMax) * ph;
+  const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, height: H });
+  const fmt = spec.fmt || fmtInt;
+  for (const t of [0, yMax / 2, yMax]) {
+    svg.append(s("line", { x1: ml, x2: ml + pw, y1: y(t), y2: y(t), stroke: t === 0 ? "var(--axis)" : "var(--line)", "stroke-width": 1 }));
+    svg.append(s("text", { x: ml - 6, y: y(t) + 4, "text-anchor": "end" }, spec.tickFmt ? spec.tickFmt(t) : fmtK(t)));
+  }
+  const n = spec.data.length, band = pw / n, bw = Math.min(24, Math.max(3, band * 0.62));
+  const every = Math.ceil(n / Math.max(1, Math.floor(pw / 46)));
+  spec.data.forEach((d, i) => {
+    const cx = ml + band * i + band / 2;
+    const g = s("g", { tabindex: 0 });
+    if (d.value != null && d.value > 0) {
+      const top = y(d.value), bot = y(0), r = Math.min(4, bw / 2, bot - top);
+      const x0 = cx - bw / 2, x1 = cx + bw / 2;
+      g.append(s("path", { d: `M${x0},${bot}V${top + r}Q${x0},${top} ${x0 + r},${top}H${x1 - r}Q${x1},${top} ${x1},${top + r}V${bot}Z`, fill: d.color || spec.color, opacity: d.dim ? 0.38 : 1 }));
+    } else if (d.value == null) {
+      g.append(s("line", { x1: cx - bw / 2, x2: cx + bw / 2, y1: y(0) - 1, y2: y(0) - 1, stroke: "var(--muted)", "stroke-width": 2, "stroke-dasharray": "2 2" }));
+    }
+    const hit = s("rect", { x: cx - band / 2, y: mt, width: band, height: ph, fill: "transparent" });
+    g.append(hit);
+    const tipNodes = () => [h("b", null, d.value == null ? "No data" : fmt(d.value) + (spec.unit ? " " + spec.unit : "")), h("span", { class: "muted" }, d.tip || d.label)];
+    g.addEventListener("pointermove", (e) => showTip(e, tipNodes()));
+    g.addEventListener("pointerleave", hideTip);
+    g.addEventListener("focus", () => { const r = hit.getBoundingClientRect(); showTip({ clientX: r.left + r.width / 2, clientY: r.top }, tipNodes()); });
+    g.addEventListener("blur", hideTip);
+    svg.append(g);
+    if (i % every === 0 || i === n - 1) svg.append(s("text", { x: cx, y: H - 6, "text-anchor": "middle" }, d.label));
+  });
+  if (spec.target) {
+    svg.append(s("line", { x1: ml, x2: ml + pw, y1: y(spec.target), y2: y(spec.target), stroke: "var(--ink-2)", "stroke-width": 1.5, "stroke-dasharray": "5 4" }));
+    svg.append(s("text", { x: ml + pw + 6, y: y(spec.target) + 4, class: "tgt-label" }, spec.targetLabel || fmtK(spec.target)));
+  }
+  el.append(svg);
+}
+/** Line: spec {from, to, lines:[{points:[{date,value}], color, label}], dots:[{date,value}], fmt, unit, height} */
+function drawLine(el, spec, W) {
+  const H = spec.height || 190, ml = 44, mr = 12, mt = 12, mb = 22;
+  const pw = W - ml - mr, ph = H - mt - mb;
+  const dates = C.dateRange(spec.from, spec.to);
+  const all = [...spec.lines.flatMap((l) => l.points), ...(spec.dots || [])].map((p) => p.value).filter((v) => v != null);
+  if (!all.length) { el.append(h("div", { class: "muted", style: "padding:20px 0" }, spec.empty || "No data in this range")); return; }
+  let lo = Math.min(...all), hi = Math.max(...all);
+  const padv = Math.max((hi - lo) * 0.15, spec.minSpan || 1);
+  lo -= padv; hi += padv;
+  const step = (hi - lo) / 3;
+  const x = (d) => ml + (dates.length <= 1 ? pw / 2 : (C.daysBetween(spec.from, d) / (dates.length - 1)) * pw);
+  const y = (v) => mt + ph - ((v - lo) / (hi - lo)) * ph;
+  const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, height: H });
+  const fmt = spec.fmt || fmt1;
+  for (let i = 0; i <= 3; i++) {
+    const v = lo + step * i;
+    svg.append(s("line", { x1: ml, x2: ml + pw, y1: y(v), y2: y(v), stroke: i === 0 ? "var(--axis)" : "var(--line)" }));
+    svg.append(s("text", { x: ml - 6, y: y(v) + 4, "text-anchor": "end" }, fmt(v)));
+  }
+  const every = Math.ceil(dates.length / Math.max(1, Math.floor(pw / 58)));
+  dates.forEach((d, i) => { if (i % every === 0) svg.append(s("text", { x: x(d), y: H - 6, "text-anchor": "middle" }, C.fmtDate(d))); });
+  for (const l of spec.lines) {
+    let path = "", pen = false;
+    for (const p of l.points) {
+      if (p.value == null || p.date < spec.from || p.date >= spec.to) { pen = false; continue; }
+      path += (pen ? "L" : "M") + x(p.date).toFixed(1) + "," + y(p.value).toFixed(1);
+      pen = true;
+    }
+    if (l.area && path) {
+      const pts = l.points.filter((p) => p.value != null && p.date >= spec.from && p.date < spec.to);
+      if (pts.length > 1) svg.append(s("path", { d: path + `L${x(pts[pts.length - 1].date)},${mt + ph}L${x(pts[0].date)},${mt + ph}Z`, fill: l.color, opacity: 0.1 }));
+    }
+    svg.append(s("path", { d: path, fill: "none", stroke: l.color, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+  }
+  for (const p of spec.dots || []) {
+    if (p.value == null || p.date < spec.from || p.date >= spec.to) continue;
+    svg.append(s("circle", { cx: x(p.date), cy: y(p.value), r: 4, fill: spec.dotColor || "var(--ink-2)", stroke: "var(--surface)", "stroke-width": 2 }));
+  }
+  const cross = s("line", { y1: mt, y2: mt + ph, stroke: "var(--axis)", visibility: "hidden" });
+  svg.append(cross);
+  const overlay = s("rect", { x: ml, y: mt, width: pw, height: ph, fill: "transparent" });
+  overlay.addEventListener("pointermove", (e) => {
+    const r = svg.getBoundingClientRect();
+    const px = ((e.clientX - r.left) / r.width) * W;
+    const idx = Math.max(0, Math.min(dates.length - 1, Math.round(((px - ml) / pw) * (dates.length - 1))));
+    const d = dates[idx];
+    cross.setAttribute("x1", x(d)); cross.setAttribute("x2", x(d)); cross.setAttribute("visibility", "visible");
+    const rows = [h("span", { class: "muted" }, C.fmtDate(d, { dow: true }))];
+    for (const l of spec.lines) { const p = l.points.find((q) => q.date === d); rows.push(h("div", null, h("b", { style: "display:inline" }, p && p.value != null ? fmt(p.value) : "—"), " ", h("span", { class: "muted" }, l.label || ""))); }
+    if (spec.dots) { const p = spec.dots.find((q) => q.date === d); rows.push(h("div", null, h("b", { style: "display:inline" }, p ? fmt(p.value) : "—"), " ", h("span", { class: "muted" }, spec.dotLabel || ""))); }
+    showTip(e, rows);
+  });
+  overlay.addEventListener("pointerleave", () => { cross.setAttribute("visibility", "hidden"); hideTip(); });
+  svg.append(overlay);
+  el.append(svg);
+}
+function drawSpark(el, spec, W) {
+  const H = 30, vals = spec.values;
+  const present = vals.filter((v) => v != null);
+  if (present.length < 2) return;
+  let lo = Math.min(...present, spec.target ?? Infinity), hi = Math.max(...present, spec.target ?? -Infinity);
+  if (hi === lo) { hi += 1; lo -= 1; }
+  const x = (i) => 2 + (i / (vals.length - 1)) * (W - 8);
+  const y = (v) => 3 + (H - 6) - ((v - lo) / (hi - lo)) * (H - 6);
+  const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, height: H, "aria-hidden": "true" });
+  if (spec.target != null) svg.append(s("line", { x1: 0, x2: W, y1: y(spec.target), y2: y(spec.target), stroke: "var(--axis)", "stroke-dasharray": "3 3" }));
+  if (spec.bars) {
+    const bw = Math.max(2, Math.min(8, (W / vals.length) * 0.55));
+    vals.forEach((v, i) => { if (v != null) { const yy = y(v), base = H - 2; svg.append(s("rect", { x: x(i) - bw / 2, y: Math.min(yy, base - 1), width: bw, height: Math.max(1, base - yy), rx: 1, fill: spec.color, opacity: i === vals.length - 1 ? 1 : 0.55 })); } });
+  } else {
+    let d = "", pen = false;
+    vals.forEach((v, i) => { if (v == null) { pen = false; return; } d += (pen ? "L" : "M") + x(i).toFixed(1) + "," + y(v).toFixed(1); pen = true; });
+    svg.append(s("path", { d, fill: "none", stroke: spec.color, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    const li = vals.length - 1 - [...vals].reverse().findIndex((v) => v != null);
+    svg.append(s("circle", { cx: x(li), cy: y(vals[li]), r: 3.5, fill: spec.color, stroke: "var(--surface)", "stroke-width": 2 }));
+  }
+  el.append(svg);
+}
+
+// -------------------------------------------------------- tiles & pieces
+function tile({ label, value, unit, sub, pill, spark, empty }) {
+  if (empty) return h("div", { class: "tile empty" }, h("div", { class: "lab" }, label), h("div", { class: "val" }, empty), sub ? h("div", { class: "sub" }, sub) : null);
+  return h("div", { class: "tile" },
+    h("div", { class: "lab" }, h("span", null, label), pill ? h("span", { class: "pill " + pill.cls }, pill.icon + " " + pill.text) : null),
+    h("div", { class: "val" }, value, unit ? h("small", null, unit) : null),
+    h("div", { class: "sub" }, sub || ""),
+    spark ? chartBox({ type: "spark", ...spark }) : null);
+}
+const PILL = {
+  good: (t) => ({ cls: "good", icon: "✓", text: t }),
+  warn: (t) => ({ cls: "warn", icon: "◐", text: t }),
+  bad: (t) => ({ cls: "bad", icon: "✕", text: t }),
+};
+
+function freshness(m) {
+  const c = m.coverage || {};
+  const last = (metric) => c[metric] || Object.keys(m.days).filter((d) => m.days[d][metric] != null).sort().pop();
+  const wLast = c.workouts || (m.workouts.length ? m.workouts[m.workouts.length - 1].date : null);
+  const items = [["Workouts", wLast], ["Steps", last("steps")], ["Food", last("calories")], ["Weight", last("weight")]];
+  return h("div", { class: "fresh" }, items.map(([k, d]) => h("span", { class: "chip", title: d ? `${k} data through ${d}` : `No ${k.toLowerCase()} data yet` }, d ? `${k} → ${C.fmtDate(d)}` : `${k}: none yet`)));
+}
+
+function kpiTiles(m, win, opts = {}) {
+  const sum = C.windowSummary(m, win.from, win.to);
+  const t = m.targets;
+  const weeks = sum.nDays / 7;
+  const tiles = [];
+  const end = C.addDays(win.to, -1);
+
+  // Workouts
+  if (!sum.workouts.hasSource) tiles.push(tile({ label: "Workouts", empty: "No workout data yet", sub: "Add a Hevy export or workout notes" }));
+  else {
+    const target = t.workouts_per_week ? Math.round(t.workouts_per_week * weeks) : null;
+    const wb = C.weeklyBuckets(m, end, 8, m.week_starts ?? 1);
+    const bits = [];
+    if (target) bits.push(`target ${target}`);
+    if (sum.workouts.count) bits.push(`${sum.workouts.legsFirst} legs-first`);
+    if (t.cardio_per_week) bits.push(`${sum.workouts.cardio} conditioning`);
+    let pill = null;
+    if (target) pill = sum.workouts.count >= target ? PILL.good("on target") : null;
+    tiles.push(tile({ label: "Workouts", value: String(sum.workouts.count), unit: sum.nDays > 8 ? `in ${sum.nDays} days` : "this week", sub: bits.join(" · "), pill, spark: { values: wb.map((b) => b.workouts), color: personColor(m.id), bars: true, target: t.workouts_per_week } }));
+  }
+  // Steps
+  if (!sum.steps.n) tiles.push(tile({ label: "Steps / day", empty: "No step data yet", sub: "Apple Health shortcut or screenshot" }));
+  else {
+    const tg = t.steps_avg_min;
+    const pill = tg ? (sum.steps.avg >= tg ? PILL.good("above " + fmtK(tg)) : sum.steps.avg >= tg * 0.85 ? PILL.warn("near " + fmtK(tg)) : PILL.bad("under " + fmtK(tg))) : null;
+    const sv = C.series(m.days, "steps", C.addDays(win.to, -28), win.to).map((p) => p.value);
+    tiles.push(tile({ label: "Steps / day", value: fmtInt(sum.steps.avg), sub: `${sum.steps.n} of ${sum.nDays} days with data`, pill, spark: { values: sv, color: personColor(m.id), bars: true, target: tg } }));
+  }
+  // Calories
+  if (!sum.calories.n) tiles.push(tile({ label: "Calories / day", empty: "No food log yet", sub: "MacroFactor / MyFitnessPal via Health" }));
+  else {
+    const bits = [`${sum.calories.n} of ${Math.min(sum.nDays, sum.calories.knownDays || sum.nDays)} days logged`];
+    let pill = null;
+    if (t.calories_daily_max) {
+      bits.push(`${sum.calories.underMax ?? 0} under ${fmtInt(t.calories_daily_max)}`);
+      pill = (sum.calories.underMax ?? 0) === sum.calories.n ? PILL.good("all under") : null;
+    } else if (t.calories_target) {
+      bits.push(`target ${fmtInt(t.calories_target)}`);
+      pill = sum.calories.avg <= t.calories_target * 1.03 ? PILL.good("on target") : sum.calories.avg <= t.calories_target * 1.1 ? PILL.warn("a bit over") : PILL.bad("over");
+    }
+    const cv = C.series(m.days, "calories", C.addDays(win.to, -28), win.to).map((p) => p.value);
+    tiles.push(tile({ label: "Calories / day", value: fmtInt(sum.calories.avg), unit: "kcal", sub: bits.join(" · "), pill, spark: { values: cv, color: personColor(m.id), bars: true, target: t.calories_daily_max || t.calories_target } }));
+  }
+  // Weight
+  if (!sum.weight.latest) tiles.push(tile({ label: "Weight", empty: "No weigh-ins yet", sub: "Weigh-ins from the scale app or Health" }));
+  else {
+    const tw = C.trendWeight(m.days, end).filter((p) => p.date >= C.addDays(win.to, -56));
+    const bits = [];
+    if (sum.weight.trend != null) bits.push(`trend ${fmt1(sum.weight.trend)}`);
+    if (sum.weight.rate != null) bits.push(`${fmtSigned(sum.weight.rate)} lb/wk`);
+    bits.push(`${sum.weight.weighIns} weigh-in${sum.weight.weighIns === 1 ? "" : "s"}`);
+    const stale = sum.weight.latest.date < win.from;
+    tiles.push(tile({ label: "Weight", value: fmt1(sum.weight.latest.value), unit: stale ? `lb · ${C.fmtDate(sum.weight.latest.date)}` : "lb", sub: bits.join(" · "), spark: tw.length > 1 ? { values: tw.map((p) => p.trend), color: personColor(m.id) } : null }));
+  }
+  return h("div", { class: "tiles" + (opts.four ? " four" : "") }, tiles);
+}
+
+// ------------------------------------------------------------ commitments
+const ST_ICON = { met: "✓", partial: "◐", missed: "✕", nodata: "–", manual: "?", skip: "–" };
+const ST_LABEL = { met: "Done", partial: "Partly", missed: "Not yet", nodata: "No data", manual: "Tick in call", skip: "Skipped" };
+function checkinWindow(ci) {
+  const next = S.checkins.find((c) => c.date > ci.date);
+  return { from: ci.date, to: next ? next.date : C.addDays(today(), 1) };
+}
+function commitmentList(ci, pid) {
+  const items = (ci.commitments || []).map((c, i) => ({ c, i })).filter(({ c }) => c.owner === pid);
+  if (!items.length) return h("div", { class: "muted" }, "No commitments recorded for this check-in.");
+  const m = model(pid);
+  const w = checkinWindow(ci);
+  return h("div", { class: "commit" }, items.map(({ c, i }) => {
+    const r = C.commitmentStatus(c, m, w.from, w.to);
+    const canEdit = S.canWrite !== false && S.db;
+    const btn = h("button", {
+      class: "st " + r.status, type: "button", disabled: !canEdit,
+      title: canEdit ? `${ST_LABEL[r.status]}${r.overridden ? " (set in call)" : ""}. Click to change.` : ST_LABEL[r.status],
+      "aria-label": `${c.title}: ${ST_LABEL[r.status]}`,
+      onclick: () => cycleOverride(ci, i),
+    }, ST_ICON[r.status]);
+    return h("div", { class: "crow" }, btn,
+      h("div", null, h("div", { class: "t" }, c.title), h("div", { class: "d" }, r.text + (r.overridden ? " · set in call" : ""))),
+      h("div", { class: "tag" }, ST_LABEL[r.status]));
+  }));
+}
+async function cycleOverride(ci, idx) {
+  const order = [undefined, "met", "missed", "skip"];
+  const list = (ci.commitments || []).map((c) => ({ ...c }));
+  const cur = list[idx].override;
+  const next = order[(order.indexOf(cur) + 1) % order.length];
+  if (next === undefined) delete list[idx].override; else list[idx].override = next;
+  try { await S.db.doc("checkins/" + ci.date).update({ commitments: list }); }
+  catch (e) { flash("Couldn't save that change (" + (e.code || "error") + ")."); }
+}
+function flash(msg) { document.getElementById("sync-note").textContent = msg; }
+
+// ------------------------------------------------------------- overview
+function viewOverview() {
+  const win = currentWindow();
+  const ci = win.checkin || S.checkins[S.checkins.length - 1];
+  const ids = personIds();
+  const head = h("div", { class: "window-line" },
+    h("h2", null, `${C.fmtDate(win.from, { dow: true })} → ${C.fmtDate(C.addDays(win.to, -1), { dow: true })}`),
+    h("span", { class: "muted" }, ci ? `Commitments from the ${C.fmtDate(ci.date)} check-in` : "No check-in recorded yet"));
+  if (!ids.length) return [head, emptyState()];
+  const cols = h("div", { class: "cols" }, ids.map((id) => {
+    const m = model(id);
+    return h("section", { class: "pcol", "aria-label": personName(id) },
+      h("div", { class: "phead" }, h("span", { class: "dot", style: `background:${personColor(id)}` }), h("h2", null, personName(id)), freshness(m)),
+      kpiTiles(m, win),
+      h("div", { class: "card" }, h("header", null, h("h3", null, "Commitments"), ci ? h("span", { class: "muted", style: "font-size:.82rem" }, `since ${C.fmtDate(ci.date)}`) : null),
+        ci ? commitmentList(ci, id) : h("div", { class: "muted" }, "Paste your first Gemini notes on the Check-ins tab.")));
+  }));
+  return [head, cols];
+}
+function emptyState() {
+  return h("div", { class: "notice" },
+    h("b", null, S.db ? "No data yet. " : "Open this page in Claude to load the shared data. "),
+    S.db ? "Add a Hevy export, a MacroFactor export, an Apple Health file, workout notes or a screenshot on the Add data tab. Paste Gemini notes on the Check-ins tab to record commitments." : "The dashboard reads and saves its data through Claude, so it shows nothing when opened anywhere else.");
+}
+
+// --------------------------------------------------------------- person
+function viewPerson(id) {
+  const m = model(id);
+  const win = currentWindow();
+  const end = C.addDays(win.to, -1);
+  const t = m.targets;
+  const color = personColor(id);
+  const out = [];
+  out.push(h("div", { class: "phead" }, h("span", { class: "dot", style: `background:${color}` }), h("h2", null, personName(id)), freshness(m)));
+  out.push(kpiTiles(m, win, { four: true }));
+
+  // Workouts
+  const wb = C.weeklyBuckets(m, end, 10, m.week_starts ?? 1);
+  const sum = C.windowSummary(m, win.from, win.to);
+  const wCard = h("div", { class: "card" }, h("header", null, h("h3", null, "Workouts per week"), h("span", { class: "muted", style: "font-size:.82rem" }, `weeks start ${C.DOW_SHORT[m.week_starts ?? 1]}`)));
+  if (!sum.workouts.hasSource && !m.workouts.length) wCard.append(h("div", { class: "muted" }, "No workout data yet."));
+  else {
+    wCard.append(chartBox({ type: "bar", color, target: t.workouts_per_week, targetLabel: t.workouts_per_week ? `target ${t.workouts_per_week}` : null, integer: true, tickFmt: (v) => String(v), fmt: (v) => String(v), unit: "workouts", minMax: 4, data: wb.map((b) => ({ label: C.fmtDate(b.weekStart), value: b.workouts, dim: b.partial, tip: `Week of ${C.fmtDate(b.weekStart)}${b.partial ? " (in progress)" : ""}${t.cardio_per_week ? ` · ${b.cardio} conditioning` : ""}` })) }));
+    const rows = sum.workouts.list.slice().reverse().map((w) => {
+      const first = w.exercises && w.exercises[0];
+      const chips = [];
+      if (first && C.isLegExercise(first.name)) chips.push(h("span", { class: "chip good" }, "legs first"));
+      if (C.isCardioWorkout(w)) chips.push(h("span", { class: "chip" }, "conditioning"));
+      if (w.time && w.time < "11:00") chips.push(h("span", { class: "chip" }, "morning"));
+      return h("tr", null, h("td", null, C.fmtDate(w.date, { dow: true })), h("td", { class: "num" }, w.time || "—"), h("td", null, w.title || "Workout"),
+        h("td", null, (w.exercises || []).map((e) => e.name).slice(0, 6).join(", ") + ((w.exercises || []).length > 6 ? "…" : "")), h("td", null, h("span", { class: "mini" }, chips)));
+    });
+    wCard.append(rows.length ? h("div", { class: "tablewrap" }, h("table", null, h("thead", null, h("tr", null, h("th", null, "Day"), h("th", { class: "num" }, "Start"), h("th", null, "Session"), h("th", null, "Exercises"), h("th", null, ""))), h("tbody", null, rows)))
+      : h("div", { class: "muted" }, "No sessions in this window."));
+  }
+
+  // Lifts & benchmarks
+  const lifts = liftCard(m);
+
+  // Steps & calories (last 28 days)
+  const from28 = C.addDays(win.to, -28);
+  const dayBars = (metric, target, tl, unitLabel, colorFn) => C.series(m.days, metric, from28, win.to).map((p) => ({ label: C.fmtDate(p.date), value: p.value, tip: C.fmtDate(p.date, { dow: true }), color: colorFn ? colorFn(p.value) : null, dim: p.date < win.from }));
+  const sCard = h("div", { class: "card" }, h("header", null, h("h3", null, "Steps"), h("span", { class: "muted", style: "font-size:.82rem" }, "last 28 days · faded = before this window")));
+  sCard.append(Object.keys(m.days).some((d) => m.days[d].steps != null) ? chartBox({ type: "bar", color, unit: "steps", target: t.steps_avg_min, targetLabel: t.steps_avg_min ? fmtK(t.steps_avg_min) : null, data: dayBars("steps") }) : h("div", { class: "muted" }, "No step data yet."));
+  const calTarget = t.calories_daily_max || t.calories_target;
+  const nCard = h("div", { class: "card" }, h("header", null, h("h3", null, "Calories"), h("span", { class: "muted", style: "font-size:.82rem" }, t.calories_daily_max ? `daily max ${fmtInt(t.calories_daily_max)}` : t.calories_target ? `target ${fmtInt(t.calories_target)}` : "last 28 days")));
+  if (Object.keys(m.days).some((d) => m.days[d].calories != null)) {
+    nCard.append(chartBox({ type: "bar", color, unit: "kcal", target: calTarget, targetLabel: calTarget ? fmtK(calTarget) : null, data: dayBars("calories") }));
+    const prot = sum.protein.avg;
+    nCard.append(h("div", { class: "muted", style: "font-size:.84rem" }, `Dashed ticks = not logged. Logging streak: ${C.streak(m.days, "calories", today())} days` + (prot ? ` · protein ${fmtInt(prot)} g/day this window` : "")));
+  } else nCard.append(h("div", { class: "muted" }, "No food log yet."));
+
+  // Weight
+  const wtCard = h("div", { class: "card" }, h("header", null, h("h3", null, "Weight"), h("span", { class: "muted", style: "font-size:.82rem" }, t.weight_goal ? `goal ${t.weight_goal} lb` : "")));
+  const scale = Object.keys(m.days).filter((d) => m.days[d].weight != null).sort();
+  if (scale.length) {
+    const wFrom = C.addDays(win.to, -56);
+    const tw = C.trendWeight(m.days, end);
+    const appTrend = Object.keys(m.days).filter((d) => m.days[d].trend_weight != null).sort().map((d) => ({ date: d, value: m.days[d].trend_weight }));
+    const lines = appTrend.length ? [{ points: appTrend, color, label: "app trend" }] : [{ points: tw.map((p) => ({ date: p.date, value: p.trend })), color, label: "trend" }];
+    wtCard.append(h("div", { class: "legend" }, h("span", null, h("i", { style: `background:${color}` }), appTrend.length ? "Trend (from app)" : "Trend (smoothed)"), h("span", null, h("i", { class: "box", style: "background:var(--ink-2);border-radius:50%" }), "Weigh-in")));
+    wtCard.append(chartBox({ type: "line", from: wFrom, to: win.to, lines, dots: scale.map((d) => ({ date: d, value: m.days[d].weight })), dotLabel: "weigh-in", fmt: fmt1, empty: "No weigh-ins in the last 8 weeks" }));
+  } else wtCard.append(h("div", { class: "muted" }, "No weigh-ins yet."));
+
+  out.push(h("div", { class: "grid2" }, wCard, lifts));
+  out.push(h("div", { class: "grid2" }, sCard, nCard));
+  out.push(h("div", { class: "grid2" }, wtCard, goalsCard(m)));
+  return out;
+}
+
+function liftCard(m) {
+  const card = h("div", { class: "card" }, h("header", null, h("h3", null, "Lifts & benchmarks")));
+  const rows = [];
+  for (const lift of m.watch_lifts || []) {
+    const match = C.exerciseMatcher(lift.pattern);
+    const hist = [];
+    for (const w of m.workouts) for (const e of w.exercises || []) if (match(e.name)) { const ts = C.topSet(e.sets); if (ts) hist.push({ date: w.date, w: ts.w, r: ts.r }); }
+    const marks = (m.marks || []).filter((k) => k.metric === lift.metric);
+    const last = hist[hist.length - 1];
+    const lastMark = marks[marks.length - 1];
+    let value = "—", when = "no sessions yet";
+    if (last && (!lastMark || last.date >= lastMark.date)) { value = `${fmtInt(last.w)} × ${last.r ?? "?"}`; when = C.fmtDate(last.date); }
+    else if (lastMark) { value = `${fmtInt(lastMark.value)} ${lastMark.unit || ""}`; when = `${C.fmtDate(lastMark.date)} · ${lastMark.source === "call" ? "said on call" : lastMark.source || ""}`; }
+    rows.push(h("tr", null, h("td", null, lift.label), h("td", { class: "num" }, value), h("td", null, when), h("td", { class: "num muted" }, lift.goal ? `goal ${lift.goal}` : ""), h("td", { class: "num muted" }, hist.length ? `${hist.length} sessions` : "")));
+  }
+  const listed = new Set((m.watch_lifts || []).map((l) => l.metric));
+  const byMetric = {};
+  for (const k of m.marks || []) if (!listed.has(k.metric)) (byMetric[k.metric] = byMetric[k.metric] || []).push(k);
+  for (const [metric, ks] of Object.entries(byMetric)) {
+    ks.sort((a, b) => a.date.localeCompare(b.date));
+    const last = ks[ks.length - 1], prev = ks[ks.length - 2];
+    const v = last.unit === "s" ? fmtDur(last.value) : `${fmt1(last.value).replace(/\.0$/, "")} ${last.unit || ""}`;
+    const delta = prev ? (last.unit === "s" ? fmtSigned(last.value - prev.value, 0) + " s" : fmtSigned(last.value - prev.value)) : "";
+    rows.push(h("tr", null, h("td", null, last.label || metric), h("td", { class: "num" }, v), h("td", null, `${C.fmtDate(last.date)}${last.source === "call" ? " · said on call" : ""}`), h("td", { class: "num muted" }, delta ? `vs prev ${delta}` : ""), h("td", { class: "num muted" }, `${ks.length} logged`)));
+  }
+  card.append(rows.length ? h("div", { class: "tablewrap" }, h("table", null, h("tbody", null, rows))) : h("div", { class: "muted" }, "Nothing tracked yet. Benchmarks (a circuit time, a top set) can be added on the Add data tab."));
+  return card;
+}
+function goalsCard(m) {
+  const card = h("div", { class: "card" }, h("header", null, h("h3", null, "Long-term goals")));
+  const g = (m.goals && m.goals.long) || [];
+  card.append(g.length ? h("ol", { class: "goals" }, g.map((x) => h("li", null, x))) : h("div", { class: "muted" }, "No goals recorded."));
+  return card;
+}
+
+// ---------------------------------------------------------------- check-ins
+function viewCheckins() {
+  if (!S.tabNodes.checkins) S.tabNodes.checkins = buildCheckinsTab();
+  S.tabNodes.checkins.refresh();
+  return [S.tabNodes.checkins];
+}
+function buildCheckinsTab() {
+  const list = h("div", { style: "display:grid;gap:16px" });
+  const preview = h("div", { class: "form" });
+  const status = h("div", { class: "status" });
+  const ta = h("textarea", { id: "notes-in", placeholder: "Paste the Gemini notes (or the whole Google Doc) from the call here." });
+  let parsed = null;
+  const parseBtn = h("button", { class: "btn primary", type: "button", onclick: () => {
+    const n = C.parseGeminiNotes(ta.value);
+    if (!n.nextSteps.length) { status.className = "status err"; status.textContent = "Couldn't find a Next steps list. Paste the notes including the \"Next steps\" section."; preview.replaceChildren(); return; }
+    parsed = n;
+    status.className = "status"; status.textContent = `Found ${n.nextSteps.length} commitments and ${n.decisions.length} decisions.`;
+    renderPreview();
+  } }, "Read notes");
+  const KINDS = [["manual", "Tick in call"], ["workout_count", "Workout count"], ["legs_first", "Legs first"], ["workout_time_window", "Morning sessions"], ["exercise_present", "Exercise added"], ["exercise_absent", "Exercise removed"], ["weigh_in_days", "Daily weigh-ins"], ["logging_days", "Food logged daily"], ["steps_avg_min", "Step average"], ["calories_avg_max", "Calorie average"], ["calories_daily_max", "Daily calorie max"], ["cardio_count", "Conditioning sessions"]];
+  function renderPreview() {
+    const date = h("input", { type: "date", id: "ci-date", value: parsed.date || today() });
+    const rows = parsed.nextSteps.map((st, i) => {
+      const owner = C.resolveOwner(st.owner, S.people);
+      const check = C.suggestCheck(st.title, st.detail, parsed.date || today());
+      st._owner = owner; st._check = check;
+      const ownerSel = h("select", { id: "own-" + i, "aria-label": "Owner", onchange: (e) => { st._owner = e.target.value || null; } }, h("option", { value: "" }, "Nobody"), personIds().map((id) => h("option", { value: id, selected: id === owner }, personName(id))));
+      const kindSel = h("select", { id: "kind-" + i, "aria-label": "Check", onchange: (e) => { st._check = e.target.value === check.kind ? check : { kind: e.target.value, params: defaultParams(e.target.value, st._owner) }; } }, KINDS.map(([k, l]) => h("option", { value: k, selected: k === check.kind }, l)));
+      return h("tr", null, h("td", null, ownerSel), h("td", null, h("b", null, st.title), h("div", { class: "muted", style: "font-size:.82rem" }, st.detail)), h("td", null, kindSel));
+    });
+    const save = h("button", { class: "btn primary", type: "button", disabled: !S.db || S.canWrite === false, onclick: async () => {
+      const d = date.value;
+      const doc = {
+        date: d, title: parsed.title, summary: parsed.summary, source: "gemini",
+        decisions: parsed.decisions.map((x) => x.title + (x.detail ? ": " + x.detail : "")),
+        commitments: parsed.nextSteps.filter((x) => x._owner).map((x, i) => ({ id: "c" + (i + 1), owner: x._owner, title: x.title, detail: x.detail, check: x._check })),
+      };
+      try {
+        const ex = await S.db.doc("checkins/" + d).get();
+        if (ex.exists) { const old = ex.data(); doc.commitments = doc.commitments.map((c) => { const o = (old.commitments || []).find((k) => k.title === c.title && k.owner === c.owner); return o && o.override ? { ...c, override: o.override } : c; }); }
+        await S.db.doc("checkins/" + d).set(doc);
+        status.className = "status ok"; status.textContent = `Saved the ${C.fmtDate(d)} check-in.`; preview.replaceChildren(); ta.value = ""; parsed = null;
+      } catch (e) { status.className = "status err"; status.textContent = "Couldn't save (" + (e.code || "error") + ")."; }
+    } }, "Save check-in");
+    preview.replaceChildren(h("div", { class: "row" }, h("label", null, "Call date", date)), h("div", { class: "tablewrap" }, h("table", null, h("thead", null, h("tr", null, h("th", null, "Owner"), h("th", null, "Commitment"), h("th", null, "Checked by"))), h("tbody", null, rows))), h("div", { class: "row" }, save, h("span", { class: "muted", style: "font-size:.84rem" }, "Unrecognised items become manual ticks. Nothing counts as missed without data.")));
+  }
+  const importCard = h("div", { class: "card" }, h("header", null, h("h3", null, "Add this week's notes")),
+    h("p", { class: "ink2", style: "margin:0" }, "Paste the Gemini notes after each call. The Next steps list becomes next week's commitments, checked automatically against the data where possible."),
+    ta, h("div", { class: "row" }, parseBtn), status, preview);
+  const node = h("div", { style: "display:grid;gap:20px" }, importCard, list);
+  node.refresh = () => {
+    const cis = S.checkins.slice().reverse();
+    list.replaceChildren(...(cis.length ? cis.map((ci) => h("div", { class: "card" },
+      h("header", null, h("h3", null, `${C.fmtDate(ci.date, { dow: true })} check-in`), h("span", { class: "muted", style: "font-size:.82rem" }, (() => { const w = checkinWindow(ci); return `commitments checked ${C.fmtDate(w.from)} → ${C.fmtDate(C.addDays(w.to, -1))}`; })())),
+      ci.summary ? h("p", { style: "margin:0" }, ci.summary) : null,
+      h("div", { class: "cols" }, personIds().map((id) => h("div", null, h("div", { class: "phead", style: "margin-bottom:4px" }, h("span", { class: "dot", style: `background:${personColor(id)}` }), h("h3", null, personName(id))), commitmentList(ci, id)))),
+      (ci.decisions || []).length ? h("details", null, h("summary", { class: "ink2" }, `Decisions (${ci.decisions.length})`), h("ul", null, ci.decisions.map((d) => h("li", null, d)))) : null))
+      : [h("div", { class: "notice" }, "No check-ins recorded yet.")]));
+  };
+  return node;
+}
+function defaultParams(kind, owner) {
+  const t = (S.people[owner] || {}).targets || {};
+  switch (kind) {
+    case "workout_count": return { min: t.workouts_per_week || 3 };
+    case "cardio_count": return { min: t.cardio_per_week || 2 };
+    case "workout_time_window": return { start: "05:00", end: "11:00", label: "in the morning" };
+    case "exercise_present": case "exercise_absent": return { pattern: "" };
+    case "weigh_in_days": case "logging_days": return { share: 1 };
+    case "steps_avg_min": return { min: t.steps_avg_min || 10000 };
+    case "calories_avg_max": return { max: t.calories_target || 2000 };
+    case "calories_daily_max": return { max: t.calories_daily_max || 2000 };
+    default: return {};
+  }
+}
+
+// --------------------------------------------------------------------- ask
+function viewAsk() {
+  if (!S.tabNodes.ask) S.tabNodes.ask = buildAskTab();
+  S.tabNodes.ask.refresh();
+  return [S.tabNodes.ask];
+}
+function buildAskTab() {
+  const input = h("input", { type: "text", id: "ask-in", placeholder: "How many times did I do leg press in the last month?", "aria-label": "Question" });
+  const askerSel = h("select", { id: "asker", "aria-label": "Asking as", onchange: (e) => { S.asker = e.target.value; store("asker", S.asker); } });
+  const answers = h("div", { style: "display:grid;gap:14px" });
+  const note = h("div", { class: "status" });
+  const go = h("button", { class: "btn primary", type: "button", onclick: () => submit() }, "Ask");
+  const suggest = h("div", { class: "suggest" });
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") submit(); });
+  function submit(q) {
+    q = (q || input.value).trim();
+    if (!q) return;
+    input.value = "";
+    runAsk(q, answers, note);
+  }
+  const node = h("div", { style: "display:grid;gap:16px" },
+    h("div", { class: "card" },
+      h("header", null, h("h3", null, "Ask about the data"), h("label", { class: "row muted", style: "font-size:.85rem" }, "Asking as", askerSel)),
+      h("div", { class: "ask-box" }, input, go), suggest, note,
+      h("div", { class: "muted", style: "font-size:.8rem" }, "Answers come from Claude on the viewer's own Claude plan. Counts and averages are computed by the page, not guessed.")),
+    answers);
+  node.refresh = () => {
+    const ids = personIds();
+    if (!S.asker || !ids.includes(S.asker)) S.asker = ids[0] || null;
+    askerSel.replaceChildren(...ids.map((id) => h("option", { value: id, selected: id === S.asker }, personName(id))));
+    const other = ids.find((x) => x !== S.asker);
+    const qs = [
+      "How many times did I do leg press in the last month?",
+      "Show my steps vs my target over the last 4 weeks",
+      "How many days did I log food this week?",
+      "Chart my weight trend since September",
+      other ? `Compare my workouts per week with ${personName(other)}'s` : null,
+    ].filter(Boolean);
+    suggest.replaceChildren(...qs.map((q) => h("button", { type: "button", onclick: () => submit(q) }, q)));
+    go.disabled = !S.sample;
+    if (!S.sample) note.textContent = S.ready ? "Asking needs this page opened in Claude." : "";
+  };
+  return node;
+}
+
+function askContext() {
+  const ids = personIds();
+  const people = ids.map((id) => {
+    const m = model(id);
+    const cov = {};
+    for (const metric of Object.keys(C.METRICS)) {
+      const ds = Object.keys(m.days).filter((d) => m.days[d][metric] != null).sort();
+      if (ds.length) cov[metric] = { first: ds[0], last: ds[ds.length - 1], days: ds.length };
+    }
+    if (m.workouts.length) cov.workouts = { first: m.workouts[0].date, last: m.workouts[m.workouts.length - 1].date, sessions: m.workouts.length };
+    return { id, name: personName(id), aliases: m.aliases || [], week_starts: C.DOW_SHORT[m.week_starts ?? 1], sources: m.sources || {}, targets: m.targets, data_available: cov, benchmarks: [...new Set((m.marks || []).map((k) => k.metric))] };
+  });
+  const ci = S.checkins[S.checkins.length - 1];
+  return { today: today(), people, latest_checkin: ci ? { date: ci.date, commitments: (ci.commitments || []).map((c) => ({ owner: c.owner, title: c.title })) } : null };
+}
+
+function askTools(entry, onChart) {
+  const pid = (x) => { const id = C.resolveOwner(String(x || ""), S.people) || String(x || "").toLowerCase(); if (!personIds().includes(id)) throw new Error(`Unknown person "${x}". Use one of: ${personIds().join(", ")}`); return id; };
+  const range = (i) => ({ from: i.from ? String(i.from) : "1900-01-01", to: i.to ? C.addDays(String(i.to), 1) : C.addDays(today(), 1) });
+  const step = (msg) => { entry.progress = msg; entry.render(); };
+  return [
+    { name: "find_exercises", description: "List exercise names a person has logged (optionally filtered by a case-insensitive substring), with session counts and last date. Use it to find the exact exercise names before counting.",
+      inputSchema: { type: "object", properties: { person: { type: "string" }, query: { type: "string" } }, required: ["person"] },
+      execute: (i) => { step("Looking up exercises…"); const m = model(pid(i.person)); const q = String(i.query || "").toLowerCase(); const map = {};
+        for (const w of m.workouts) for (const e of w.exercises || []) { if (q && !e.name.toLowerCase().includes(q)) continue; const r = map[e.name] || (map[e.name] = { name: e.name, sessions: 0, last: null }); r.sessions++; r.last = w.date; }
+        return Object.values(map).sort((a, b) => b.sessions - a.sessions).slice(0, 80); } },
+    { name: "exercise_history", description: "Sessions containing exercises whose name matches `pattern` (case-insensitive regex or substring) between from and to (inclusive, YYYY-MM-DD). Returns the computed session count, per-week counts and each session's top set. Use this for 'how many times' questions.",
+      inputSchema: { type: "object", properties: { person: { type: "string" }, pattern: { type: "string" }, from: { type: "string" }, to: { type: "string" } }, required: ["person", "pattern"] },
+      execute: (i) => { step("Counting sessions…"); const id = pid(i.person); const m = model(id); const { from, to } = range(i); const match = C.exerciseMatcher(String(i.pattern)); const entries = []; const names = new Set();
+        for (const w of m.workouts) { if (w.date < from || w.date >= to) continue; const hits = (w.exercises || []).filter((e) => match(e.name)); if (!hits.length) continue;
+          hits.forEach((e) => names.add(e.name)); const ts = C.topSet(hits.flatMap((e) => e.sets)); entries.push({ date: w.date, exercises: hits.map((e) => e.name), working_sets: hits.flatMap((e) => e.sets).filter((x) => x.type !== "warmup").length, top_set: ts ? `${ts.w} lb x ${ts.r ?? "?"}` : null, est_1rm: ts && C.e1rm(ts.w, ts.r) ? Math.round(C.e1rm(ts.w, ts.r)) : null }); }
+        const byWeek = {}; for (const e of entries) { const ws = C.weekStart(e.date, m.week_starts ?? 1); byWeek[ws] = (byWeek[ws] || 0) + 1; }
+        return { person: id, matched_names: [...names], sessions: entries.length, by_week: Object.entries(byWeek).map(([week_start, sessions]) => ({ week_start, sessions })), entries: entries.slice(-120) }; } },
+    { name: "workouts", description: "A person's workout sessions between from and to (inclusive): computed count, per-week counts, and each session's date, start time, title, exercise names and whether it was conditioning.",
+      inputSchema: { type: "object", properties: { person: { type: "string" }, from: { type: "string" }, to: { type: "string" } }, required: ["person"] },
+      execute: (i) => { step("Reading workouts…"); const id = pid(i.person); const m = model(id); const { from, to } = range(i); const ws = m.workouts.filter((w) => w.date >= from && w.date < to);
+        const byWeek = {}; for (const w of ws) { const k = C.weekStart(w.date, m.week_starts ?? 1); byWeek[k] = (byWeek[k] || 0) + 1; }
+        return { person: id, count: ws.length, by_week: Object.entries(byWeek).map(([week_start, sessions]) => ({ week_start, sessions })), sessions: ws.slice(-100).map((w) => ({ date: w.date, time: w.time, title: w.title, conditioning: C.isCardioWorkout(w), exercises: (w.exercises || []).map((e) => e.name) })) }; } },
+    { name: "daily_metric", description: "Daily values of one metric (steps, calories, protein, carbs, fat, weight, trend_weight, expenditure) for a person between from and to (inclusive). Returns computed average, min, max, days with data, and the values. Days with no data are omitted, never zero.",
+      inputSchema: { type: "object", properties: { person: { type: "string" }, metric: { type: "string", enum: Object.keys(C.METRICS) }, from: { type: "string" }, to: { type: "string" } }, required: ["person", "metric"] },
+      execute: (i) => { step("Reading daily data…"); const id = pid(i.person); const m = model(id); const metric = String(i.metric); if (!C.METRICS[metric]) throw new Error("Unknown metric"); const { from, to } = range(i);
+        const vals = Object.keys(m.days).filter((d) => d >= from && d < to && m.days[d][metric] != null).sort().map((d) => ({ date: d, value: m.days[d][metric] }));
+        const xs = vals.map((v) => v.value);
+        return { person: id, metric, unit: C.METRICS[metric].unit, days_with_data: xs.length, average: xs.length ? Math.round(C.mean(xs) * 10) / 10 : null, min: xs.length ? Math.min(...xs) : null, max: xs.length ? Math.max(...xs) : null, values: vals.slice(-400) }; } },
+    { name: "benchmarks", description: "Logged benchmarks for a person (for example a circuit time in seconds or a top set reported on a call), optionally filtered by metric name.",
+      inputSchema: { type: "object", properties: { person: { type: "string" }, metric: { type: "string" } }, required: ["person"] },
+      execute: (i) => { const m = model(pid(i.person)); return (m.marks || []).filter((k) => !i.metric || k.metric.includes(String(i.metric))); } },
+    { name: "show_chart", description: "Draw a chart under the answer. type 'bar' for counts per week/day or comparisons, 'line' for trends over dates. x values are YYYY-MM-DD dates (line) or short labels (bar). Use numbers from the other tools only. Call at most twice.",
+      inputSchema: { type: "object", properties: { type: { type: "string", enum: ["bar", "line"] }, title: { type: "string" }, unit: { type: "string" }, target: { type: "number" }, series: { type: "array", items: { type: "object", properties: { name: { type: "string" }, person: { type: "string" }, points: { type: "array", items: { type: "object", properties: { x: { type: "string" }, y: { type: "number" } }, required: ["x", "y"] } } }, required: ["name", "points"] } } }, required: ["type", "series"] },
+      execute: (i) => { onChart(i); return "Chart shown to the viewer."; } },
+  ];
+}
+
+function chartFromTool(spec) {
+  const series = Array.isArray(spec.series) ? spec.series.slice(0, 4) : [];
+  const colorOf = (sr, idx) => { const id = sr.person ? C.resolveOwner(String(sr.person), S.people) || String(sr.person).toLowerCase() : null; return id && S.people[id] ? personColor(id) : ["var(--p1)", "var(--p2)", "#1baf7a", "#eda100"][idx]; };
+  const wrap = h("div", { class: "card", style: "padding:12px" }, spec.title ? h("h3", { style: "font-size:1.05rem" }, String(spec.title)) : null);
+  if (series.length > 1) wrap.append(h("div", { class: "legend" }, series.map((sr, i) => h("span", null, h("i", { class: spec.type === "bar" ? "box" : "", style: `background:${colorOf(sr, i)}` }), String(sr.name)))));
+  if (spec.type === "line") {
+    const pts = series.flatMap((sr) => (sr.points || []).map((p) => C.parseDateTime(p.x)).filter(Boolean).map((p) => p.date)).sort();
+    if (!pts.length) return null;
+    wrap.append(chartBox({ type: "line", from: pts[0], to: C.addDays(pts[pts.length - 1], 1), unit: spec.unit, lines: series.map((sr, i) => ({ label: String(sr.name), color: colorOf(sr, i), points: (sr.points || []).map((p) => ({ date: (C.parseDateTime(p.x) || {}).date, value: C.num(p.y) })).filter((p) => p.date).sort((a, b) => a.date.localeCompare(b.date)) })), fmt: (v) => (Math.abs(v) >= 1000 ? fmtInt(v) : fmt1(v)) }));
+  } else {
+    // Bars: one series draws directly; several series interleave per label.
+    const labels = [...new Set(series.flatMap((sr) => (sr.points || []).map((p) => String(p.x))))];
+    const nice = (x) => { const d = C.parseDateTime(x); return d && /^\d{4}-/.test(x) ? C.fmtDate(d.date) : x; };
+    const data = [];
+    for (const lab of labels) series.forEach((sr, i) => { const p = (sr.points || []).find((q) => String(q.x) === lab); data.push({ label: i === 0 ? nice(lab) : "", value: p ? C.num(p.y) : null, color: colorOf(sr, i), tip: `${sr.name} · ${nice(lab)}` }); });
+    wrap.append(chartBox({ type: "bar", color: colorOf(series[0] || {}, 0), unit: spec.unit, target: C.num(spec.target), data, fmt: (v) => (Math.abs(v) >= 100 ? fmtInt(v) : fmt1(v).replace(/\.0$/, "")) }));
+  }
+  return wrap;
+}
+
+async function runAsk(q, answers, note) {
+  if (!S.sample) { note.textContent = "Asking needs this page opened in Claude."; return; }
+  const ctl = new AbortController();
+  const aEl = h("div", { class: "a thinking" }, "Thinking…");
+  const chartsEl = h("div", { style: "display:grid;gap:10px" });
+  const stop = h("button", { class: "btn small", type: "button", onclick: () => ctl.abort() }, "Stop");
+  const meta = h("div", { class: "meta" }, h("span", null, `Asked as ${personName(S.asker)}`), stop);
+  const card = h("div", { class: "card answer" }, h("div", { class: "q" }, q), aEl, chartsEl, meta);
+  answers.prepend(card);
+  const entry = { progress: "", text: "", render() { if (!this.text) aEl.textContent = this.progress || "Thinking…"; } };
+  const limits = await S.sample.limits().catch(() => null);
+  const useTools = !!(limits && limits.tools);
+  const ctx = askContext();
+  const rules = [
+    "You answer ad hoc questions on a weekly fitness check-in dashboard shared by two friends. They look at it together on a call, so be brief.",
+    `The viewer asking is ${personName(S.asker)} (id "${S.asker}"): "I", "me", "my" mean them.`,
+    "Rules:",
+    "- Lead with the number. 1-3 short sentences. No preamble, no markdown headings, no tables.",
+    "- Get every number from the tools. Never count or average a list yourself when a tool returns the computed value.",
+    "- Exercise names vary (\"Leg Press (Machine)\"). Use find_exercises or a loose regex pattern in exercise_history.",
+    "- 'Last month' = the last 30 days ending today; 'this week' = since the person's week start; say the dates you used.",
+    "- If a chart would help (anything over time, or a comparison), call show_chart once with numbers from the tools.",
+    "- If the data needed isn't there, say what's missing and which source would fill it. Missing days are missing, not zero.",
+    "Context (JSON):",
+    JSON.stringify(ctx),
+  ].join("\n");
+  let input, tools;
+  if (useTools) {
+    tools = askTools(entry, (spec) => { const c = chartFromTool(spec); if (c) { chartsEl.append(c); requestAnimationFrame(drawCharts); } });
+    input = [{ role: "user", content: rules }, { role: "user", content: "Question: " + q }];
+  } else {
+    // Without page tools: send a compact copy of recent data and ask for an optional chart block.
+    const dump = personIds().map((id) => { const m = model(id); const from = C.addDays(today(), -120); return { id, days: Object.fromEntries(Object.entries(m.days).filter(([d]) => d >= from).map(([d, r]) => [d, Object.fromEntries(Object.entries(r).filter(([k]) => k !== "src"))])), workouts: m.workouts.filter((w) => w.date >= from).map((w) => ({ d: w.date, t: w.time, title: w.title, ex: (w.exercises || []).map((e) => e.name) })) }; });
+    input = [{ role: "user", content: rules.replace(/Get every number from the tools[^\n]*/, "Count carefully from the data below.") + "\nData (last 120 days):\n" + JSON.stringify(dump) + '\nIf a chart helps, end with a fenced ```chart block holding JSON {"type":"bar"|"line","title":"","unit":"","series":[{"name":"","person":"","points":[{"x":"","y":0}]}]}.' }, { role: "user", content: "Question: " + q }];
+  }
+  try {
+    const res = await S.sample(input, { signal: ctl.signal, tools, modelTier: "default", ...(useTools ? {} : { cache: false }), onText: ({ text }) => {
+      entry.text = text;
+      aEl.className = "a";
+      aEl.textContent = useTools ? text : text.replace(/```chart[\s\S]*$/, "").trim();
+    } });
+    if (!useTools) {
+      const m = res.text.match(/```chart\s*([\s\S]*?)```/);
+      if (m) { try { const c = chartFromTool(JSON.parse(m[1])); if (c) { chartsEl.append(c); requestAnimationFrame(drawCharts); } } catch (_) {} }
+    }
+    if (res.truncated) meta.append(h("span", null, "Answer was cut short."));
+  } catch (e) {
+    aEl.className = "a";
+    if (e && e.code === "cancelled") aEl.textContent = (e.text || "").trim() || "Stopped.";
+    else if (e && (e.code === "not_granted" || e.code === "sampling_disabled")) { aEl.textContent = "Claude isn't allowed for this page in this view. Allow it from the page's permissions to ask questions."; }
+    else if (e && e.code === "rate_limited") aEl.textContent = (e.text ? e.text + "\n\n" : "") + "Claude usage limit reached for now. Try again in a bit.";
+    else aEl.textContent = (e && e.text ? e.text + "\n\n" : "") + "The answer didn't finish (" + ((e && e.code) || "error") + "). Ask again to retry.";
+  } finally { stop.remove(); }
+}
+
+// --------------------------------------------------------------- add data
+function viewData() {
+  if (!S.tabNodes.data) S.tabNodes.data = buildDataTab();
+  S.tabNodes.data.refresh();
+  return [S.tabNodes.data];
+}
+function personSelect(id) {
+  const sel = h("select", { id, "aria-label": "Whose data" });
+  sel.refresh = () => { const cur = sel.value; sel.replaceChildren(...personIds().map((p) => h("option", { value: p, selected: p === cur }, personName(p)))); };
+  return sel;
+}
+
+let xlsxLoading = null;
+function loadXLSX() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (!xlsxLoading) xlsxLoading = new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"; sc.onload = () => res(window.XLSX); sc.onerror = () => rej(new Error("Couldn't load the spreadsheet reader")); document.head.append(sc); });
+  return xlsxLoading;
+}
+async function readTables(file) {
+  const name = file.name.toLowerCase();
+  if (/\.(xlsx|xls)$/.test(name)) {
+    const X = await loadXLSX();
+    const wb = X.read(await file.arrayBuffer(), { type: "array", cellDates: true });
+    return wb.SheetNames.map((sn) => ({ name: sn, objects: X.utils.sheet_to_json(wb.Sheets[sn], { defval: "", raw: true }) })).filter((t) => t.objects.length);
+  }
+  const text = await file.text();
+  if (/\.json$/.test(name)) {
+    const j = JSON.parse(text);
+    const arr = Array.isArray(j) ? j : j.data || j.rows || j.days || [];
+    return [{ name: file.name, objects: arr }];
+  }
+  return [{ name: file.name, objects: C.rowsToObjects(C.parseCSV(text)) }];
+}
+
+/** Merge parsed data into month-bucket documents. */
+async function saveDays(pid, days, src, through) {
+  const buckets = C.bucketDays(days, src);
+  for (const [month, recs] of Object.entries(buckets)) {
+    const ref = S.db.doc(`days/${pid}_${month}`);
+    const ex = await ref.get();
+    const cur = ex.exists ? (ex.data().d || {}) : {};
+    const d = { ...cur };
+    for (const [date, rec] of Object.entries(recs)) d[date] = { ...(cur[date] || {}), ...rec, src: { ...((cur[date] || {}).src || {}), ...(rec.src || {}) } };
+    await ref.set({ person: pid, month, d });
+  }
+  const metrics = [...new Set(Object.values(days).flatMap((r) => Object.keys(r)))];
+  await bumpCoverage(pid, Object.fromEntries(metrics.map((m) => [m, through || Object.keys(days).sort().pop()])), src);
+}
+async function saveWorkouts(pid, workouts, through, src) {
+  const buckets = C.bucketWorkouts(workouts);
+  for (const [month, items] of Object.entries(buckets)) {
+    const ref = S.db.doc(`workouts/${pid}_${month}`);
+    const ex = await ref.get();
+    const cur = ex.exists ? (ex.data().items || {}) : {};
+    await ref.set({ person: pid, month, items: { ...cur, ...JSON.parse(JSON.stringify(items)) } });
+  }
+  await bumpCoverage(pid, { workouts: through || workouts.map((w) => w.date).sort().pop() }, src);
+}
+async function saveMarks(pid, marks) {
+  const ref = S.db.doc("marks/" + pid);
+  const ex = await ref.get();
+  const items = ex.exists ? { ...(ex.data().items || {}) } : {};
+  for (const k of marks) items[`${k.metric}_${k.date}`] = k;
+  await ref.set({ person: pid, items });
+}
+async function bumpCoverage(pid, upd, src) {
+  const ref = S.db.doc("coverage/" + pid);
+  const ex = await ref.get();
+  const cur = ex.exists ? { ...ex.data() } : { person: pid };
+  for (const [k, v] of Object.entries(upd)) if (v && (!cur[k] || v > cur[k])) cur[k] = v;
+  cur.last_import = { at: new Date().toISOString(), source: src || "import" };
+  await ref.set(cur);
+}
+
+function buildDataTab() {
+  const out = h("div", { style: "display:grid;gap:20px" });
+
+  // --- File import
+  const fileWho = personSelect("file-who");
+  const fileStatus = h("div", { class: "status" });
+  const filePreview = h("div", { class: "form" });
+  const fileIn = h("input", { type: "file", id: "file-in", multiple: true, accept: ".csv,.txt,.xlsx,.xls,.json", hidden: true, onchange: (e) => handleFiles(e.target.files) });
+  const drop = h("div", { class: "drop", tabindex: 0, role: "button", onclick: () => fileIn.click(), onkeydown: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileIn.click(); } } },
+    h("b", null, "Drop export files here"), h("div", { class: "muted", style: "font-size:.85rem" }, "Hevy workouts CSV · MacroFactor export (.xlsx or .csv) · Apple Health shortcut CSV · any CSV with a date column"));
+  drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("over"); });
+  drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+  drop.addEventListener("drop", (e) => { e.preventDefault(); drop.classList.remove("over"); handleFiles(e.dataTransfer.files); });
+  let pending = null;
+  async function handleFiles(files) {
+    filePreview.replaceChildren();
+    pending = { workouts: [], days: {}, src: [], unknown: [] };
+    fileStatus.className = "status"; fileStatus.textContent = "Reading…";
+    try {
+      for (const f of files) {
+        const tables = await readTables(f);
+        for (const t of tables) {
+          const kind = C.detectTable(t.objects).kind;
+          if (kind === "hevy") { pending.workouts.push(...C.parseHevy(t.objects)); pending.src.push("hevy"); }
+          else if (kind === "daily") { const r = C.parseDailyTable(t.objects); pending.days = C.mergeDays(pending.days, r.days); pending.src.push(/macro/i.test(f.name) ? "macrofactor" : /health|shortcut/i.test(f.name) ? "apple_health" : "file"); }
+          else if (kind === "unknown") pending.unknown.push({ file: f.name, sheet: t.name, objects: t.objects });
+        }
+      }
+    } catch (e) { fileStatus.className = "status err"; fileStatus.textContent = "Couldn't read that file: " + (e.message || e); return; }
+    showFilePreview();
+  }
+  function showFilePreview() {
+    const p = pending;
+    const lines = [];
+    if (p.workouts.length) lines.push(`${p.workouts.length} workouts, ${C.fmtDate(p.workouts[0].date)} – ${C.fmtDate(p.workouts[p.workouts.length - 1].date)}`);
+    const dates = Object.keys(p.days).sort();
+    if (dates.length) { const ms = [...new Set(Object.values(p.days).flatMap((r) => Object.keys(r)))].map((k) => (C.METRICS[k] || {}).label || k); lines.push(`${dates.length} days of ${ms.join(", ")}, ${C.fmtDate(dates[0])} – ${C.fmtDate(dates[dates.length - 1])}`); }
+    for (const u of p.unknown) lines.push(`Not recognised: ${u.file}${u.sheet && u.sheet !== u.file ? " / " + u.sheet : ""} (columns: ${Object.keys(u.objects[0] || {}).slice(0, 8).join(", ")})`);
+    fileStatus.className = lines.length ? "status" : "status err";
+    fileStatus.textContent = lines.length ? "" : "Nothing recognisable in those files.";
+    const throughIn = h("input", { type: "date", id: "file-through", value: today() });
+    const save = h("button", { class: "btn primary", type: "button", disabled: !(p.workouts.length || dates.length) || !S.db || S.canWrite === false, onclick: async () => {
+      save.disabled = true; fileStatus.textContent = "Saving…";
+      try {
+        const pid = fileWho.value;
+        if (p.workouts.length) await saveWorkouts(pid, p.workouts, throughIn.value, "hevy");
+        if (dates.length) await saveDays(pid, p.days, p.src.find((x) => x !== "hevy") || "file", throughIn.value);
+        fileStatus.className = "status ok"; fileStatus.textContent = `Saved to ${personName(pid)}.`; filePreview.replaceChildren(); pending = null;
+      } catch (e) { fileStatus.className = "status err"; fileStatus.textContent = "Couldn't save (" + (e.code || e.message || "error") + ")."; save.disabled = false; }
+    } }, "Save");
+    const mapBtns = p.unknown.map((u) => h("button", { class: "btn small", type: "button", disabled: !S.sample, onclick: async (e) => {
+      e.currentTarget.disabled = true; fileStatus.textContent = "Asking Claude which columns are which…";
+      try {
+        const sample = u.objects.slice(0, 6);
+        const mapping = await S.sample.json(`These are the first rows of a fitness app export (JSON rows):\n${JSON.stringify(sample)}\n\nMap its columns to daily metrics. Reply with only JSON: {"date": "<date column header>", "metrics": {"steps"?: "<header>", "calories"?: "<header>", "protein"?: "<header>", "carbs"?: "<header>", "fat"?: "<header>", "weight"?: "<header>", "trend_weight"?: "<header>", "expenditure"?: "<header>"}, "kg": {"weight"?: true}}. Leave out metrics that aren't present. Don't map goal or target columns.`, { modelTier: "quick" });
+        const r = C.parseDailyTable(u.objects, { mapping });
+        p.days = C.mergeDays(p.days, r.days); p.unknown = p.unknown.filter((x) => x !== u); p.src.push("file");
+        showFilePreview();
+      } catch (err) { fileStatus.className = "status err"; fileStatus.textContent = "Couldn't map the columns (" + (err.code || "error") + ")."; }
+    } }, `Let Claude map ${u.file}`));
+    filePreview.replaceChildren(
+      h("ul", { style: "margin:0;padding-left:1.2em" }, lines.map((l) => h("li", null, l))),
+      mapBtns.length ? h("div", { class: "row" }, mapBtns) : null,
+      h("div", { class: "row" }, h("label", null, "Exported on", throughIn), save, h("span", { class: "muted", style: "font-size:.82rem" }, "Days after the export date count as unknown, not missed.")));
+  }
+  out.append(h("div", { class: "card" }, h("header", null, h("h3", null, "Import export files"), h("label", { class: "row muted", style: "font-size:.85rem" }, "For", fileWho)), drop, fileIn, fileStatus, filePreview));
+
+  // --- Notes / screenshots read by Claude
+  const aiWho = personSelect("ai-who");
+  const aiText = h("textarea", { id: "ai-text", placeholder: "Paste workout notes for the week (any format). Example:\nMon – Push: bench 4x8 @185, incline DB 3x10 @60\nThu – rowing intervals, 5k in 21:40" });
+  const aiWeek = h("input", { type: "date", id: "ai-week", value: C.weekStart(today(), 0) });
+  const imgIn = h("input", { type: "file", id: "ai-img", accept: "image/png,image/jpeg,image/webp,image/gif", multiple: true });
+  const aiStatus = h("div", { class: "status" });
+  const aiPreview = h("div", { class: "form" });
+  const readBtn = h("button", { class: "btn primary", type: "button", onclick: () => readWithClaude() }, "Read with Claude");
+  async function readWithClaude() {
+    if (!S.sample) { aiStatus.className = "status err"; aiStatus.textContent = "Reading notes needs this page opened in Claude."; return; }
+    const txt = aiText.value.trim(); const imgs = imgIn.files;
+    if (!txt && !(imgs && imgs.length)) { aiStatus.className = "status err"; aiStatus.textContent = "Paste notes or pick a screenshot first."; return; }
+    readBtn.disabled = true; aiStatus.className = "status"; aiStatus.textContent = "Reading… (usually 10–40 s)";
+    const pid = aiWho.value;
+    const prompt = [
+      `Convert this fitness information for ${personName(pid)} into JSON. Today is ${today()}. The week being described starts ${aiWeek.value} (dates without a year are in ${today().slice(0, 4)}).`,
+      "Reply with only JSON in this shape:",
+      '{"workouts":[{"date":"YYYY-MM-DD or null","time":"HH:MM or null","title":"short name","conditioning":true|false,"exercises":[{"name":"standard exercise name","sets":[{"w":lb or null,"r":reps or null,"s":seconds or null}]}]}],',
+      ' "days":[{"date":"YYYY-MM-DD","steps":n?,"calories":n?,"protein":n?,"weight":lb?}],',
+      ' "benchmarks":[{"date":"YYYY-MM-DD","metric":"snake_case_name","label":"Readable name","value":number,"unit":"s|lb|reps|min"}],',
+      ' "uncertain":"one sentence on anything you guessed, or empty"}',
+      "Rules: one workout per session. A drop set is one set per weight. Timed efforts like a 21:40 circuit or 5k are benchmarks in seconds (1300). Use null for dates you can't tell. Only include numbers that are actually shown; never invent values. Weight in lb (convert kg).",
+      txt ? "Notes:\n" + txt.slice(0, 20000) : "The data is in the attached screenshots (fitness apps such as Apple Health, MyFitnessPal, MacroFactor or a notes app).",
+    ].join("\n");
+    try {
+      const opts = { modelTier: "default" };
+      if (imgs && imgs.length) opts.images = imgs;
+      const r = await S.sample.json(prompt, opts);
+      showAiPreview(pid, r || {});
+      aiStatus.textContent = r && r.uncertain ? "Note from Claude: " + r.uncertain : "Check the rows, fix any dates, then save.";
+    } catch (e) {
+      aiStatus.className = "status err";
+      aiStatus.textContent = e.code === "images_unavailable" ? "Screenshots can't be sent from this view; paste text instead." : e.code === "not_granted" ? "Claude isn't allowed for this page in this view." : "Couldn't read that (" + (e.code || "error") + "). Try again or simplify.";
+    } finally { readBtn.disabled = false; }
+  }
+  function showAiPreview(pid, r) {
+    const ws = (Array.isArray(r.workouts) ? r.workouts : []).map((w) => ({ date: (C.parseDateTime(w.date) || {}).date || null, time: C.parseTime(w.time), title: String(w.title || "Workout"), source: "notes", tags: w.conditioning ? ["vo2"] : [], exercises: (w.exercises || []).map((e) => ({ name: String(e.name || "Exercise"), sets: (e.sets || []).map((x) => { const o = { type: "normal" }; const W = C.num(x.w), R = C.num(x.r), Sx = C.num(x.s); if (W != null) o.w = W; if (R != null) o.r = R; if (Sx != null) o.s = Sx; return o; }) })) }));
+    const days = (Array.isArray(r.days) ? r.days : []).map((d) => ({ date: (C.parseDateTime(d.date) || {}).date, steps: C.num(d.steps), calories: C.num(d.calories), protein: C.num(d.protein), weight: C.num(d.weight) })).filter((d) => d.date);
+    const marks = (Array.isArray(r.benchmarks) ? r.benchmarks : []).map((b) => ({ date: (C.parseDateTime(b.date) || {}).date || today(), metric: String(b.metric || "benchmark").toLowerCase().replace(/[^a-z0-9_]+/g, "_"), label: String(b.label || b.metric || "Benchmark"), value: C.num(b.value), unit: String(b.unit || ""), source: "notes" })).filter((b) => b.value != null);
+    const rows = [];
+    ws.forEach((w, i) => {
+      const di = h("input", { type: "date", id: "aw-d-" + i, value: w.date || "", onchange: (e) => { w.date = e.target.value || null; } });
+      rows.push(h("tr", null, h("td", null, di), h("td", null, h("b", null, w.title), w.tags.length ? " · conditioning" : ""), h("td", null, w.exercises.map((e) => `${e.name}${e.sets.length ? ` (${e.sets.length})` : ""}`).join(", "))));
+    });
+    const dayRows = days.map((d) => h("tr", null, h("td", null, C.fmtDate(d.date, { dow: true })), h("td", null, "Daily"), h("td", null, Object.entries(d).filter(([k, v]) => k !== "date" && v != null).map(([k, v]) => `${(C.METRICS[k] || {}).label || k}: ${fmtInt(v)}`).join(" · "))));
+    const markRows = marks.map((b) => h("tr", null, h("td", null, C.fmtDate(b.date)), h("td", null, "Benchmark"), h("td", null, `${b.label}: ${b.unit === "s" ? fmtDur(b.value) : b.value + " " + b.unit}`)));
+    const save = h("button", { class: "btn primary", type: "button", disabled: !S.db || S.canWrite === false, onclick: async () => {
+      if (ws.some((w) => !w.date)) { aiStatus.className = "status err"; aiStatus.textContent = "Give every workout a date first."; return; }
+      save.disabled = true; aiStatus.className = "status"; aiStatus.textContent = "Saving…";
+      try {
+        if (ws.length) await saveWorkouts(pid, ws, ws.map((w) => w.date).sort().pop(), "notes");
+        if (days.length) { const obj = {}; for (const d of days) { const { date, ...rest } = d; obj[date] = Object.fromEntries(Object.entries(rest).filter(([, v]) => v != null)); } await saveDays(pid, obj, imgIn.files && imgIn.files.length ? "screenshot" : "notes"); }
+        if (marks.length) await saveMarks(pid, marks);
+        aiStatus.className = "status ok"; aiStatus.textContent = `Saved to ${personName(pid)}.`; aiPreview.replaceChildren(); aiText.value = ""; imgIn.value = "";
+      } catch (e) { aiStatus.className = "status err"; aiStatus.textContent = "Couldn't save (" + (e.code || e.message || "error") + ")."; save.disabled = false; }
+    } }, "Save");
+    const all = [...rows, ...dayRows, ...markRows];
+    aiPreview.replaceChildren(all.length ? h("div", { class: "tablewrap" }, h("table", null, h("tbody", null, all))) : h("div", { class: "muted" }, "Claude didn't find anything to save."), all.length ? h("div", { class: "row" }, save) : null);
+  }
+  out.append(h("div", { class: "card" }, h("header", null, h("h3", null, "Workout notes or screenshots"), h("label", { class: "row muted", style: "font-size:.85rem" }, "For", aiWho)),
+    h("p", { class: "ink2", style: "margin:0" }, "For anything without an export: paste a notes-app workout log, or add screenshots of Health, MyFitnessPal or the scale. Claude turns them into rows you check before saving."),
+    aiText, h("div", { class: "row" }, h("label", null, "Week starting", aiWeek), h("label", null, "Screenshots", imgIn), readBtn), aiStatus, aiPreview));
+
+  // --- Quick entry
+  const qWho = personSelect("q-who");
+  const qDate = h("input", { type: "date", id: "q-date", value: today() });
+  const qMetric = h("select", { id: "q-metric" }, h("option", { value: "steps" }, "Steps"), h("option", { value: "calories" }, "Calories"), h("option", { value: "protein" }, "Protein (g)"), h("option", { value: "weight" }, "Weight (lb)"), h("option", { value: "bench" }, "Benchmark…"));
+  const qName = h("input", { type: "text", id: "q-name", placeholder: "e.g. Hyrox circuit time", hidden: true });
+  const qVal = h("input", { type: "text", id: "q-val", placeholder: "Value", inputmode: "decimal", style: "width:110px" });
+  qMetric.addEventListener("change", () => { qName.hidden = qMetric.value !== "bench"; qVal.placeholder = qMetric.value === "bench" ? "Value (mm:ss ok)" : "Value"; });
+  const qStatus = h("div", { class: "status" });
+  const qSave = h("button", { class: "btn primary", type: "button", onclick: async () => {
+    const pid = qWho.value, metric = qMetric.value, raw = qVal.value.trim();
+    let v = /^\d+:\d{2}$/.test(raw) ? raw.split(":").reduce((a, b) => a * 60 + +b, 0) : C.num(raw);
+    if (v == null || !qDate.value) { qStatus.className = "status err"; qStatus.textContent = "Enter a date and a number."; return; }
+    if (!S.db || S.canWrite === false) { qStatus.className = "status err"; qStatus.textContent = "This view can't save."; return; }
+    try {
+      if (metric === "bench") {
+        const label = qName.value.trim() || "Benchmark";
+        await saveMarks(pid, [{ date: qDate.value, metric: label.toLowerCase().replace(/[^a-z0-9]+/g, "_"), label, value: v, unit: /^\d+:\d{2}$/.test(raw) ? "s" : "", source: "manual" }]);
+      } else await saveDays(pid, { [qDate.value]: { [metric]: v } }, "manual", null);
+      qStatus.className = "status ok"; qStatus.textContent = "Saved."; qVal.value = "";
+    } catch (e) { qStatus.className = "status err"; qStatus.textContent = "Couldn't save (" + (e.code || "error") + ")."; }
+  } }, "Save");
+  out.append(h("div", { class: "card" }, h("header", null, h("h3", null, "Quick entry")), h("div", { class: "row" }, h("label", null, "Who", qWho), h("label", null, "Date", qDate), h("label", null, "What", qMetric), qName, h("label", null, "Value", qVal), qSave), qStatus));
+
+  // --- Coverage
+  const cov = h("div", { class: "tablewrap" });
+  out.append(h("div", { class: "card" }, h("header", null, h("h3", null, "What's loaded")), cov,
+    h("p", { class: "muted", style: "margin:0;font-size:.84rem" }, "Before each call: Yav exports Hevy and MacroFactor (or runs the Health shortcut); Abdul pastes the week's notes and runs the Health shortcut or adds screenshots. Anything not added simply shows as no data.")));
+
+  out.refresh = () => {
+    for (const sel of [fileWho, aiWho, qWho]) sel.refresh();
+    const rows = personIds().map((id) => {
+      const m = model(id);
+      const cell = (metric) => { const ds = Object.keys(m.days).filter((d) => m.days[d][metric] != null).sort(); return ds.length ? `${ds.length} days · to ${C.fmtDate(ds[ds.length - 1])}` : "—"; };
+      const li = (S.coverage[id] || {}).last_import;
+      return h("tr", null, h("td", null, h("span", { class: "dot", style: `background:${personColor(id)};margin-right:6px` }), personName(id)),
+        h("td", null, m.workouts.length ? `${m.workouts.length} · to ${C.fmtDate(m.workouts[m.workouts.length - 1].date)}` : "—"),
+        h("td", null, cell("steps")), h("td", null, cell("calories")), h("td", null, cell("weight")), h("td", null, (m.marks || []).length || "—"),
+        h("td", { class: "muted" }, li ? `${C.fmtDate(C.parseDateTime(li.at).date)} · ${li.source}` : "—"));
+    });
+    cov.replaceChildren(h("table", null, h("thead", null, h("tr", null, ["Person", "Workouts", "Steps", "Food", "Weight", "Benchmarks", "Last import"].map((x) => h("th", null, x)))), h("tbody", null, rows)));
+    readBtn.disabled = !S.sample;
+  };
+  return out;
+}
+
+// ----------------------------------------------------------------- render
+let renderQueued = false;
+function render() {
+  renderTabs();
+  renderWindowSelect();
+  const main = document.getElementById("main");
+  let kids;
+  if (S.tab === "overview") kids = viewOverview();
+  else if (S.tab.startsWith("p:")) kids = viewPerson(S.tab.slice(2));
+  else if (S.tab === "ask") kids = viewAsk();
+  else if (S.tab === "checkins") kids = viewCheckins();
+  else kids = viewData();
+  main.replaceChildren(...kids);
+  requestAnimationFrame(drawCharts);
+}
+function queueRender() {
+  if (renderQueued) return;
+  renderQueued = true;
+  requestAnimationFrame(() => {
+    renderQueued = false;
+    // Keep forms intact: tabs with inputs only refresh their data parts.
+    if (S.tab === "ask" || S.tab === "data" || S.tab === "checkins") { renderTabs(); renderWindowSelect(); S.tabNodes[S.tab] && S.tabNodes[S.tab].refresh(); requestAnimationFrame(drawCharts); }
+    else render();
+  });
+}
+
+// --------------------------------------------------------------- loading
+function subscribe(name, apply) {
+  S.db.collection(name).onSnapshot((snap) => { apply(snap.docs.map((d) => ({ id: d.id, ...d.data() }))); S.ready = true; syncNote(); queueRender(); },
+    (e) => { flash(`Couldn't load ${name} (${e.code}).`); });
+}
+function syncNote() {
+  flash(S.canWrite === false ? "View only" : "Shared · saved in Claude");
+}
+async function boot() {
+  render();
+  const claude = window.claude;
+  if (!claude || !claude.use) { S.ready = true; flash("Not connected"); render(); return; }
+  claude.use("sample").then((fn) => { S.sample = fn; queueRender(); }).catch(() => {});
+  const [db, user] = await Promise.all([claude.use("db").catch(() => null), claude.use("user").catch(() => null)]);
+  S.db = db;
+  if (!db) { S.ready = true; flash("Not connected"); render(); return; }
+  if (user) { try { S.canWrite = await user.can("data.write"); } catch (_) {} }
+  subscribe("people", (docs) => { S.people = Object.fromEntries(docs.map((d) => [d.id, d])); });
+  subscribe("days", (docs) => {
+    const out = {};
+    for (const d of docs) { const p = out[d.person] || (out[d.person] = {}); for (const [date, rec] of Object.entries(d.d || {})) { const { src, ...vals } = rec; p[date] = vals; } }
+    S.days = out;
+  });
+  subscribe("workouts", (docs) => {
+    const out = {};
+    for (const d of docs) { const arr = out[d.person] || (out[d.person] = []); for (const w of Object.values(d.items || {})) arr.push(w); }
+    for (const arr of Object.values(out)) arr.sort((a, b) => (a.date + (a.time || "")).localeCompare(b.date + (b.time || "")));
+    S.workouts = out;
+  });
+  subscribe("marks", (docs) => {
+    const out = {};
+    for (const d of docs) out[d.person || d.id] = Object.values(d.items || {}).sort((a, b) => a.date.localeCompare(b.date));
+    S.marks = out;
+  });
+  subscribe("coverage", (docs) => { S.coverage = Object.fromEntries(docs.map((d) => [d.person || d.id, d])); });
+  subscribe("checkins", (docs) => { S.checkins = docs.filter((d) => d.date).sort((a, b) => a.date.localeCompare(b.date)); });
+}
+boot();
+</script>
